@@ -1,46 +1,56 @@
-version: '3.8'
-
+version: "3"
 services:
-  rabbitmq1:
-    image: rabbitmq:latest
-    container_name: rabbitmq1
+  rabbit1:
+    image: rabbitmq:3-management
+    hostname: rabbit1
     environment:
-      RABBITMQ_ERLANG_COOKIE: "cookie"
-      RABBITMQ_NODENAME: "rabbit@rabbitmq1"
-    ports:
-      - "5672:5672"
-
-  rabbitmq2:
-    image: rabbitmq:latest
-    container_name: rabbitmq2
-    environment:
-      RABBITMQ_ERLANG_COOKIE: "cookie"
-      RABBITMQ_NODENAME: "rabbit@rabbitmq2"
-    ports:
-      - "5673:5672"
-
-  rabbitmq3:
-    image: rabbitmq:latest
-    container_name: rabbitmq3
-    environment:
-      RABBITMQ_ERLANG_COOKIE: "cookie"
-      RABBITMQ_NODENAME: "rabbit@rabbitmq3"
-    ports:
-      - "5674:5672"
-
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - "80:80"
+      RABBITMQ_ERLANG_COOKIE: "secret string"
+      RABBITMQ_NODENAME: rabbit1
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - "./rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
+      - "./definitions.json:/etc/rabbitmq/definitions.json"
+    
+  rabbit2:
+    image: rabbitmq:3-management
+    hostname: rabbit2
     depends_on:
-      - rabbitmq1
-      - rabbitmq2
-      - rabbitmq3
+      - rabbit1
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "secret string"
+      RABBITMQ_NODENAME: rabbit2
+    volumes:
+      - "./rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
+      - "./definitions.json:/etc/rabbitmq/definitions.json"
+    
+  rabbit3:
+    image: rabbitmq:3-management
+    hostname: rabbit3
+    depends_on:
+      - rabbit1
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "secret string"
+      RABBITMQ_NODENAME: rabbit3
+    volumes:
+      - "./rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
+      - "./definitions.json:/etc/rabbitmq/definitions.json"
       
+  haproxy:
+    image: haproxy:1.7
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - rabbit1
+      - rabbit2
+      - rabbit3
+    ports:
+      - 4369:4369
+      - 5671:5671
+      - 5672:5672
+      - 15671:15671
+      - 15672:15672
+      - 25672:25672
 
 networks:
-  rabbitmq_cluster:
-    driver: bridge
+  default:
+    external:
+      name: rabbitmq-cluster
