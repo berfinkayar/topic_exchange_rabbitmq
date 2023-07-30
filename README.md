@@ -44,4 +44,22 @@ Now our consumer listens constantly, and producer is able to send messages whene
 
 ## Topic Exchange
 
+This time let's use a different exchange type. In topic exchange, the producer sends messages to the topic, and the consumers which are interested in that topic follows that topic and receives the messages. Their routing_key can contain an asterisk (*), which matches to exactly one key, and a hash (#), which matches to zero ore more keys.
+We firstly connect to are server by using the same functions. Then we define our queue with the exchange_type parameter set to 'topic'.
+```
+channel.exchange_declare(exchange='topic_logs', exchange_type='topic')
+```
+Then we publish our message with the following function. The routing_key and the message are defined from command line.
+```
+channel.basic_publish(
+    exchange='topic_logs', routing_key=routing_key, body=message)
+```
+On the consumer side, we check the binding keys for that consumer, defined from the command line. These binding keys can be thought as the topics the consumer is interested in. Then we bind the exchange name with the queue and the binding key.  Now, when a message is published to 'topic_logs' with the routing_key equal to binding_key, it will be routed to the specified queue.
+```
+for binding_key in binding_keys:
+    channel.queue_bind(
+        exchange='topic_logs', queue=queue_name, routing_key=binding_key)
+
+```
+Now we create three consumers. Upper right one is strictly interested in calm and orange dogs. So it doesn't receive any messages sent by the producer. Lower left one is interested in any crazy animal. So it receives the messages with the binding keys "crazy.orange.cat" and "crazy.orange.kitten". Finally, the lower right one is interested in all cats and dogs, so it receives the messages with the binding keys "crazy.orange.cat" and "calm.golden.dog".
 ![alt text](screenshots/topic_exchange.png)
