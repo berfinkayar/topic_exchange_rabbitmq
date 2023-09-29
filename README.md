@@ -1,5 +1,3 @@
-# RabbitMQ
-
 ## Sending and Receiving Messages with RabbitMQ using Python
 
 Firstly we're going to install the Pika which is a Python client recommended by RabbitMQ.
