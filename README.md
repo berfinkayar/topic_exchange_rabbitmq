@@ -37,9 +37,6 @@ channel.start_consuming()
 ```
 Now our consumer listens constantly, and producer is able to send messages whenever it's run!
 
-![alt text](screenshots/sender.png)
-![alt text](screenshots/receiver.png)
-
 ## Topic Exchange
 
 This time let's use a different exchange type. In topic exchange, the producer sends messages to the topic, and the consumers which are interested in that topic follows that topic and receives the messages. Their routing_key can contain an asterisk (*), which matches to exactly one key, and a hash (#), which matches to zero ore more keys.
